@@ -34,7 +34,7 @@ $junoe_additiona_xmlrpc_methods = array(
     'wp.JupdateBlog'        => 'junoe_wp_updateBlog',
     'wp.JdeleteBlog'        => 'junoe_wp_deleteBlog',
     'wp.JpluginActivate'    => 'junoe_wp_pluginActivate',
-    'wp.JgetPageBySlug'   => 'junoe_wp_getPageBySlug',
+    'wp.JgetPageBySlug'     => 'junoe_wp_getPageBySlug',
     );
 /**
  * @brief メソッドの追加
@@ -294,8 +294,8 @@ function junoe_wp_updateBlog($args)
             restore_current_blog();
             $ret['result']  = true;
             
-            require_once dirname(__FILE__).'/junoe-ms-addhooks.php';
-            junoe_site_onchange_hook($blog_id);
+            // require_once dirname(__FILE__).'/junoe-ms-addhooks.php';
+            // junoe_site_onchange_hook($blog_id);
         }
     }
     
