@@ -59,11 +59,9 @@ function add_junoe_xmlrpc_methods($methods)
  * @retval
  */
 function junoe_wp_getPluginInfo($args){
-    if (junoe_wp_checkAdminAccount($args) === true){
-        foreach (file(__FILE__) as $line){
-            if (preg_match('/^Version:\s*([\d\.]+)$/', trim($line), $m)){
-                return $m[1];
-            }
+    foreach (file(__FILE__) as $line){
+        if (preg_match('/^Version:\s*([\d\.]+)$/', trim($line), $m)){
+            return $m[1];
         }
     }
     return new IXR_Error(-9900002, 'plugin not installed');
