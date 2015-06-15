@@ -28,6 +28,7 @@ add_action('xmlrpc_call',    'junoe_generic_xmlrpc_call');
 $junoe_additiona_xmlrpc_methods = array(
     'wp.JdeleteAllPage'     => 'junoe_wp_deleteAllPage',
     'wp.JcheckAdminAccount' => 'junoe_wp_checkAdminAccount',
+    'wp.JpluginInfo'        => 'junoe_wp_getPluginInfo',
     'wp.JgetAllPageByJSON'  => 'junoe_wp_getAllPageContentsByJson',
     'wp.JaddNewBlog'        => 'junoe_wp_addNewBlog',
     'wp.JupdateBlog'        => 'junoe_wp_updateBlog',
@@ -52,6 +53,21 @@ function add_junoe_xmlrpc_methods($methods)
 }
 
 
+/**
+ * @brief このプラグインの情報を取得する
+ * @param 
+ * @retval
+ */
+function junoe_wp_getPluginInfo($args){
+    if (junoe_wp_checkAdminAccount($args) === true){
+        foreach (file(__FILE__) as $line){
+            if (preg_match('/^Version:\s*([\d\.]+)$/', trim($line), $m)){
+                return $m[1];
+            }
+        }
+    }
+    return new IXR_Error(-9900002, 'plugin not installed');
+}
 
 /**
  * @brief check account has administrator privilege or not.
@@ -65,6 +81,8 @@ function junoe_wp_checkAdminAccount($args)
     $blog_ID     = (int) $args[0];
     $username  = $args[1];
     $password   = $args[2];
+    
+    $is_admin = false;
     
     $current_user = $wp_xmlrpc_server->login($username, $password);
     if ( is_object($current_user) ) {
