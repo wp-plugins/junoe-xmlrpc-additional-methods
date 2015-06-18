@@ -139,7 +139,7 @@ function junoe_wp_deleteAllPage($args)
             $page_id[] = intval($post->ID);
         }
 //        $sql = sprintf("DELETE FROM %s WHERE post_type='page' AND `ID` IN (%s)", $wpdb->posts, implode(",", $page_id));
-        $sql = sprintf("DELETE FROM %s WHERE 1", $wpdb->posts);
+        $sql = sprintf("DELETE FROM %s WHERE post_type='page'", $wpdb->posts);
         
         $wpdb->query($sql);
         $deleted = $wpdb->rows_affected;
@@ -245,7 +245,9 @@ function junoe_wp_updateBlog($args)
         if ($current_user->has_cap("administrator")) 
         {
             $id = $blog_id;
-            switch_to_blog( $id );
+            if (is_multisite()) {
+                switch_to_blog( $id );
+            }
 
 //            if ( isset( $_POST['update_home_url'] ) && $_POST['update_home_url'] == 'update' ) {
             if (true){
@@ -449,7 +451,9 @@ function junoe_wp_getPageBySlug($args)
     global $wp_xmlrpc_server;
     
     $blog_id = $args[0];
-    switch_to_blog( $blog_id );
+    if (is_multisite()) {
+        switch_to_blog( $blog_id );
+    }
     
     $param = array(
         'name'        => $args[3],
@@ -483,7 +487,9 @@ function junoe_wp_pluginActivate($args)
     $plugin      = $args[3];
     $activate    = $args[4];
     
-    switch_to_blog( $blog_ID );
+    if (is_multisite()) {
+        switch_to_blog( $blog_ID );
+    }
     
     if ( !$current_user = $wp_xmlrpc_server->login($username, $password) ) {
         return $wp_xmlrpc_server->error;
