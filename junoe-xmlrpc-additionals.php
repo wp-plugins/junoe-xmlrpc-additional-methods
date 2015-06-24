@@ -35,6 +35,7 @@ $junoe_additiona_xmlrpc_methods = array(
     'wp.JdeleteBlog'        => 'junoe_wp_deleteBlog',
     'wp.JpluginActivate'    => 'junoe_wp_pluginActivate',
     'wp.JgetPageBySlug'     => 'junoe_wp_getPageBySlug',
+    'wp.JuploadFile'        => 'junoe_wp_uploadFile',
     );
 /**
  * @brief メソッドの追加
@@ -121,20 +122,22 @@ function junoe_wp_deleteAllPage($args)
     }
 
     
-    $wp->parse_request(array(
-        'post_type' => 'page',
-        'posts_per_page' => 100000,
-        'posts_per_archive_page' => 100000,
-        'order' => 'asc',
-        ));
-    $wp->query_posts();
-    
     $page_id = array();
     $deleted = 0;
     $msg = "";
     
     if ($current_user->has_cap("administrator")){
+
         // 遅すぎるので一括Query
+/*         
+        $wp->parse_request(array(
+            'post_type' => 'page',
+            'posts_per_page' => 100000,
+            'posts_per_archive_page' => 100000,
+            'order' => 'asc',
+            ));
+        $wp->query_posts();
+
         foreach ((array) $wp_query->posts as $post){
             $page_id[] = intval($post->ID);
         }
@@ -146,29 +149,36 @@ function junoe_wp_deleteAllPage($args)
         if (function_exists('junoe_clear_page_rewrite_cache_file')){
             junoe_clear_page_rewrite_cache_file();
         }
-/* 
-        foreach ((array) $wp_query->posts as $post){
-            
-            $post_id = $post->ID;
-            $post_del = & get_post($post_id);
-            logIO("O", $post_id);
-            logIO("O", get_class($post_del));
-
-            if ( !current_user_can('delete_page', $post_id) )
-              wp_die( __('You are not allowed to delete this page.') );
-            
-            if ( $post_del->post_type == 'attachment' ) {
-                if ( ! wp_delete_attachment($post_id, true) )
-                  wp_die( __('Error in deleting...') );
-            } else {
-            if ( !wp_delete_post($post_id, true) ){
-              wp_die( __('Error in deleting...') );
-            }
-            $deleted++;
-        }
  */
+        $posts = get_posts(array(
+            'post_type' => array(
+                'page',
+                ),
+            'posts_per_page' => -1,
+            ));
+        foreach ($posts as $post){
+            $post_id = $post->ID;
+            $post_del = get_post($post_id);
+            if (wp_delete_post($post_id, true)){
+                $deleted++;
+            }
+        }
+        
+        $attachments = get_posts(array(
+            'post_type' => array(
+                'attachment'
+                ),
+            'posts_per_page' => -1,
+            'post_status' => 'inherit',
+            ));
+        foreach ($attachments as $attachment){
+            $attachment_id = $attachment->ID;
+            $attachment_del = get_post($attachment_id);
+            if (wp_delete_attachment($attachment_id, true)){
+                $deleted++;
+            }
+        }
     }
-    
     return $deleted;
 }
 
@@ -552,4 +562,77 @@ function junoe_generic_xmlrpc_call($method)
             break;
         }
     }
+}
+
+
+
+/**
+ * @brief 
+ * @param 
+ * @retval
+ */
+function junoe_wp_uploadFile($args)
+{
+    global $wp_xmlrpc_server;
+    
+    if (isset($args[3])) {
+        $data = $args[3];
+        if (isset($data['post_id'])){
+            global $junoe_wp_uploadFile_args;
+            $junoe_wp_uploadFile_args = $args;
+            add_filter('upload_dir', 'junoe_wp_uploadFile_changeUploadDir');
+/*            add_filter('upload_dir', function ($uploads) use ($args) {
+                error_log(var_export($uploads, true));
+                error_log(var_export($args[3]['post_id'], true));
+                return $uploads;
+            }); */
+        }
+
+        // overwriteが効かないので強制的に消す
+        // ref: https://core.trac.wordpress.org/ticket/17604
+        if ((isset($data['overwrite']) && $data['overwrite']) &&
+            (isset($data['post_id'])   && $data['post_id'])){
+            $attachments = get_posts(array(
+                'post_type' => array(
+                    'attachment'
+                    ),
+                'post_parent' => $data['post_id'],
+                'posts_per_page' => -1,
+                'post_status' => 'inherit',
+                ));
+            foreach ($attachments as $attachment){
+                if ($attachment->post_title == $data['name'] ||
+                    $attachment->post_title == "wpid-".$data['name']){
+                    wp_delete_attachment($attachment->ID, true);
+                }
+            }
+        }
+    }
+    
+    return $wp_xmlrpc_server->mw_newMediaObject($args);
+}
+
+function junoe_wp_uploadFile_changeUploadDir($uploads) {
+    global $junoe_wp_uploadFile_args;
+
+    if (isset($junoe_wp_uploadFile_args[3])){
+        $data = $junoe_wp_uploadFile_args[3];
+
+        if (isset($data['post_id'])) {
+            $post_id = $data['post_id'];
+
+            $path = get_page_uri($post_id);
+            if ($path) {
+                $path = "/". $path;
+                $subdir = $uploads['subdir'];
+                $uploads['subdir'] = $path;
+                $regexp = sprintf("@%s$@", preg_quote($subdir, "@"));
+                $uploads['path'] = preg_replace($regexp, $path, $uploads['path']);
+                $uploads['url']  = preg_replace($regexp, $path, $uploads['url']);
+            }
+
+        }
+        
+    }
+    return $uploads;
 }
