@@ -34,8 +34,10 @@ $junoe_additiona_xmlrpc_methods = array(
     'wp.JupdateBlog'        => 'junoe_wp_updateBlog',
     'wp.JdeleteBlog'        => 'junoe_wp_deleteBlog',
     'wp.JpluginActivate'    => 'junoe_wp_pluginActivate',
+    'wp.JgetPostBySlug'     => 'junoe_wp_getPostBySlug',
     'wp.JgetPageBySlug'     => 'junoe_wp_getPageBySlug',
     'wp.JuploadFile'        => 'junoe_wp_uploadFile',
+    'wp.JsetSiteToppage'    => 'junoe_wp_setSiteToppage',
     );
 /**
  * @brief メソッドの追加
@@ -255,9 +257,6 @@ function junoe_wp_updateBlog($args)
         if ($current_user->has_cap("administrator")) 
         {
             $id = $blog_id;
-            if (is_multisite()) {
-                switch_to_blog( $id );
-            }
 
 //            if ( isset( $_POST['update_home_url'] ) && $_POST['update_home_url'] == 'update' ) {
             if (true){
@@ -452,23 +451,41 @@ function _getWordpressPagePath(&$page_info, $page_ID, $nice_path = array())
 
 
 /**
+ * @brief get post by slug
+ * @param $args     0=> $blog_ID , 1=> $username, 2=> $password, 3 => $slug
+ * @retval
+ */
+function junoe_wp_getPostBySlug($args)
+{
+    return _junoe_wp_searchPostPageBySlug($args, 'post');
+}
+
+
+/**
  * @brief get page_id by slug
  * @param $args     0=> $blog_ID , 1=> $username, 2=> $password, 3 => $slug
  * @retval
  */
 function junoe_wp_getPageBySlug($args)
 {
+    return _junoe_wp_searchPostPageBySlug($args, 'page');
+}
+
+
+/**
+ * @brief 
+ * @param 
+ * @retval
+ */
+function _junoe_wp_searchPostPageBySlug($args, $post_type) {
     global $wp_xmlrpc_server;
     
     $blog_id = $args[0];
-    if (is_multisite()) {
-        switch_to_blog( $blog_id );
-    }
     
     $param = array(
         'name'        => $args[3],
-        'post_type'   => 'page',
-        'post_status' => 'publish',
+        'post_type'   => $post_type,
+//        'post_status' => 'publish',
         'showposts'   => 1,
         );
     
@@ -635,4 +652,38 @@ function junoe_wp_uploadFile_changeUploadDir($uploads) {
         
     }
     return $uploads;
+}
+
+
+
+/**
+ * @brief set site toppage as posted post_id
+ * @param 
+ * @retval
+ */
+function junoe_wp_setSiteToppage($args){
+
+    global $wp_xmlrpc_server;
+    
+    $blog_ID     = (int) $args[0];
+    $username    = $args[1];
+    $password    = $args[2];
+    $post_id     = $args[3];
+    
+    $ret = false;
+    
+    if ( !$current_user = $wp_xmlrpc_server->login($username, $password) ) {
+        return $wp_xmlrpc_server->error;
+    }
+    if ($current_user->has_cap("administrator"))
+    {
+        $post = get_post($post_id);
+        if (!is_null($post) && $post->post_status == 'publish'){
+            update_option('show_on_front', 'page');
+            update_option('page_on_front', $post_id);
+            $ret = true;
+        }
+    }
+    
+    return $ret;
 }
