@@ -3,7 +3,7 @@
 Plugin Name: Junoe XMLRPC Additional Methods
 Plugin URI: https://wordpress.org/plugins/junoe-xmlrpc-additional-methods/
 Description: Add yet another XML-RPC methods
-Version: 1.0.1
+Version: 1.0.2
 Author: ITOH Takashi
 Author URI: http://d.hatena.ne.jp/tohokuaiki/
 */
