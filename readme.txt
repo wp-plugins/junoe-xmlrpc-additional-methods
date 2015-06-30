@@ -21,7 +21,10 @@ Supplied methods are below.
 * wp.JupdateBlog : edit blog information
 * wp.JdeleteBlog : delete blog
 * wp.JpluginActivate : activate plugin
+* wp.JgetPostBySlug : get post id by slug
 * wp.JgetPageBySlug : get page id by slug
+* wp.JuploadFile : upload file with enable overwriting
+* wp.JsetSiteToppage : set site toppage option
 
 == Installation ==
 
