@@ -4,7 +4,7 @@ Donate link:
 Tags: xmlrpc
 Requires at least: 3.4.0
 Tested up to: 4.2.2
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,7 +21,10 @@ Supplied methods are below.
 * wp.JupdateBlog : edit blog information
 * wp.JdeleteBlog : delete blog
 * wp.JpluginActivate : activate plugin
+* wp.JgetPostBySlug : get post id by slug
 * wp.JgetPageBySlug : get page id by slug
+* wp.JuploadFile : upload file with enable overwriting
+* wp.JsetSiteToppage : set site toppage option
 
 == Installation ==
 
@@ -36,6 +39,12 @@ Supplied methods are below.
 
 == Changelog ==
 ...
+
+= 1.0.2 =
+* add  methods. wp.JuploadFile, JgetPostBySlug , JsetSiteToppage
+
+= 1.0.1 =
+* bug fix
 
 = 1.0.0 =
 * First release.
