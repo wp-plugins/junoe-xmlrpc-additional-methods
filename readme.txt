@@ -4,7 +4,7 @@ Donate link:
 Tags: xmlrpc
 Requires at least: 3.4.0
 Tested up to: 4.2.2
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,6 +15,7 @@ This plugin supply additional XML-RPC methods to your WordPress.
 Supplied methods are below.
 
 * wp.JdeleteAllPage : delete all pages
+* wp.JpluginInfo : return installed WordPress and this plugin information.
 * wp.JcheckAdminAccount : check account has administrator privilege or not.
 * wp.JgetAllPageByJSON : get all page content by json
 * wp.JaddNewBlog : create new blog
@@ -39,6 +40,10 @@ Supplied methods are below.
 
 == Changelog ==
 ...
+
+= 1.0.3 =
+* wp.JpluginInfo return WordPress name,version,is multi site mode or not and this plugin version.
+* wp.JdeleteAllPage targets not onry publushed pages but also private pages.
 
 = 1.0.2 =
 * add  methods. wp.JuploadFile, JgetPostBySlug , JsetSiteToppage
