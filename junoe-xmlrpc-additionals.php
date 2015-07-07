@@ -3,7 +3,7 @@
 Plugin Name: Junoe XMLRPC Additional Methods
 Plugin URI: https://wordpress.org/plugins/junoe-xmlrpc-additional-methods/
 Description: Add yet another XML-RPC methods
-Version: 1.0.2
+Version: 1.0.3
 Author: ITOH Takashi
 Author URI: http://d.hatena.ne.jp/tohokuaiki/
 */
@@ -64,7 +64,13 @@ function add_junoe_xmlrpc_methods($methods)
 function junoe_wp_getPluginInfo($args){
     foreach (file(__FILE__) as $line){
         if (preg_match('/^Version:\s*([\d\.]+)$/', trim($line), $m)){
-            return $m[1];
+            $ret = array(
+                'wpVersion' => get_bloginfo('version'),
+                'pluginVersion' => $m[1],
+                'isMultisite' => is_multisite(),
+                'siteName' => get_bloginfo('name'),
+                );
+            return $ret;
         }
     }
     return new IXR_Error(-9900002, 'plugin not installed');
@@ -157,6 +163,7 @@ function junoe_wp_deleteAllPage($args)
                 'page',
                 ),
             'posts_per_page' => -1,
+            'post_status' => 'any',
             ));
         foreach ($posts as $post){
             $post_id = $post->ID;
@@ -171,7 +178,8 @@ function junoe_wp_deleteAllPage($args)
                 'attachment'
                 ),
             'posts_per_page' => -1,
-            'post_status' => 'inherit',
+//             'post_status' => 'inherit',
+            'post_status' => 'any',
             ));
         foreach ($attachments as $attachment){
             $attachment_id = $attachment->ID;
